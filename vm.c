@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "value.h"
 #include "vm.h"
@@ -24,14 +25,14 @@ void freeVM()
 
 void pushValue(Value value)
 {
-    *vm.valueStackTop = value;
+   * vm.valueStackTop = value;
     vm.valueStackTop++;
 }
 
 Value popValue()
 {
     vm.valueStackTop--;
-    return *vm.valueStackTop;
+    return* vm.valueStackTop;
 }
 
 static InterpretResult run()
@@ -45,7 +46,7 @@ static InterpretResult run()
         pushValue(a op b); \
     } while (false)
 
-    for (;;)
+    while(1)
     {
 #ifdef DEBUG_TRACE_EXECUTION
     printf("           ");
@@ -84,7 +85,7 @@ static InterpretResult run()
                 }
             case OP_NEGATE:
                 {
-                    *(vm.valueStackTop - 1) = -*(vm.valueStackTop -1);
+                   * (vm.valueStackTop - 1) = -*(vm.valueStackTop -1);
                     break;
                 }
             case OP_RETURN:
@@ -106,9 +107,8 @@ static InterpretResult run()
 #undef BINARY_OP
 }
 
-InterpretResult interpret(Chunk* chunk)
+InterpretResult interpret(const char* source)
 {
-    vm.chunk = chunk;
-    vm.ip = vm.chunk->code;
-    return run();
+    compile(source);
+    return INTERPRET_OK;
 }
