@@ -11,16 +11,16 @@ void compile(const char* source)
     while(1)
     {
         Token token = scanToken();
-        if (token.line != line)
+        if (token.src_code_line != line)
         {
-            printf("%4d ", token.line);
-            line = token.line;
+            printf("%04d ", token.src_code_line);
+            line = token.src_code_line;
         }
         else
         {
-            printf("    | ");
+            printf("   | ");
         }
-        printf("%2d '%.*s'\n", token.type, token.length, token.start);
+        printf("%2d '%.*s'\n", token.type, token.lexeme_length, token.lexeme_start);
 
         if (token.type == TOKEN_EOF) break;
     }
