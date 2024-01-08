@@ -17,7 +17,7 @@ typedef enum {
 typedef struct {
 	int count;				// nr of opcodes currently stored in array
 	int capacity;			// capacity of array
-	uint8_t* code;			// an array of OpCodes and operands (operands are indexes of Chunk.constants)
+	uint8_t* code;			// an array of OpCodes and operands (operands are indexes into Chunk.constants)
 	int* lines;				// source code line nrs (indexes follow code array)
 	// TODO: challenge: make lines more memory efficient (c.f. challenge ch 14)
 	ValueArray constants;	// constants used by opcodes in chunk
