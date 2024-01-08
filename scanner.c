@@ -7,9 +7,9 @@
 
 typedef struct 
 {
-    const char* start_current_lexeme;
-    const char* current_pos;
-    int current_src_code_line;
+    const char* start_current_lexeme;	// points to char in source code (starting char of current lexeme being scanned)
+    const char* current_pos;		// points to current position in source code
+    int current_src_code_line;		// src code line nr where current lexeme is in
 } Scanner;
 
 static Scanner scanner; // TODO: global var no good (quick fixed with static but still bad)
@@ -41,7 +41,7 @@ static Token errorToken(const char* message)
 
 static char advance()
 {
-	return *scanner.current_pos++;
+    return *scanner.current_pos++;
 }
 
 static bool match(const char expected)

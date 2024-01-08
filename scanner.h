@@ -25,9 +25,9 @@ typedef enum {
 
 typedef struct {
 	TokenType type;
-	const char* lexeme_start;
-	int lexeme_length;
-	int src_code_line;
+	const char* lexeme_start; // points to char in source code
+	int lexeme_length;	  // length of the lexeme in bytes/chars
+	int src_code_line;	  // src code line nr of where token appears
 } Token;
 
 void initScanner(const char* source);
