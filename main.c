@@ -71,6 +71,7 @@ static void runFile(const char* path)
 
 int main(int argc, const char* argv[])
 {
+	int test = true;
 	initVM();	
 
 	if (argc == 1)

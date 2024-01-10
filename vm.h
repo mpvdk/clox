@@ -7,10 +7,10 @@
 #define VALUE_STACK_MAX 256
 
 typedef struct {
-	Chunk* chunk;	// chunk to be executed
-	uint8_t* ip;	// instruction pointer to the NEXT instruction
+	Chunk* chunk;			// chunk to be executed
+	uint8_t* ip;			// instruction pointer to the NEXT instruction
 	Value valueStack[VALUE_STACK_MAX];
-	Value* valueStackTop;
+	Value* valueStackTop;	// First empty slot of value stack
 } VM;
 
 typedef enum {
