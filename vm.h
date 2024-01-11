@@ -3,6 +3,7 @@
 
 #include "chunk.h"
 #include "object.h"
+#include "table.h"
 #include "value.h"
 
 #define VALUE_STACK_MAX 256
@@ -12,6 +13,7 @@ typedef struct {
 	uint8_t* ip;			// instruction pointer to the NEXT instruction
 	Value valueStack[VALUE_STACK_MAX];
 	Value* valueStackTop;	// First empty slot of value stack
+	Table strings;			// Interned strings
 	struct Obj* objects;	// linked list of objects allocated on heap
 } VM;
 

@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -7,6 +8,8 @@
 #include "value.h"
 
 #define TABLE_MAX_LOAD 0.75
+
+static void adjustCapacity(Table* table, int capacity);
 
 void initTable(Table* table)
 {
@@ -129,5 +132,27 @@ void tableAddAll(Table* from, Table* to)
         {
             tableSet(to, entry->key, entry->value);
         }
+    }
+}
+
+ObjString* tableFindString(Table* table, const char* chars, int length, uint32_t hash)
+{
+    if (table->count == 0) return NULL;
+
+    uint32_t index = hash % table->capacity;
+    while(1)
+    {
+        Entry* entry = table->entries + index;
+        if (entry->key == NULL)
+        {
+            if (IS_NIL(entry->value)) return NULL;
+        }
+        else if (entry->key->length == length
+            && memcmp(entry->key->chars, chars, length) == 0)
+        {
+            return entry->key;
+        }
+
+        index = (index + 1) % table->capacity;
     }
 }

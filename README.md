@@ -48,5 +48,7 @@ VM                              vm.c
     uint8_t     ip
     Value       valueStack[]
     Value*      valueStackTop
+    Table       strings;
+    struct Obj* objects
 
 
