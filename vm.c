@@ -1,10 +1,12 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "common.h"
 #include "compiler.h"
 #include "debug.h"
+#include "memory.h"
 #include "value.h"
 #include "vm.h"
 
@@ -26,16 +28,18 @@ static void runtimeError(const char* format, ...)
     size_t instruction = vm.ip - vm.chunk->code -1;
     int line = vm.chunk->lines[instruction];
     fprintf(stderr, "[line %d] in script\n", line);
-    resetValueStack;
+    resetValueStack();
 }
 
 void initVM()
 {
     resetValueStack();
+    vm.objects = NULL;
 }
 
 void freeVM()
 {
+    freeObjects();
 }
 
 void pushValue(Value value)
@@ -47,12 +51,27 @@ void pushValue(Value value)
 Value popValue()
 {
     vm.valueStackTop--;
-    return* vm.valueStackTop;
+    return *vm.valueStackTop;
 }
 
 static Value peek(int distance)
 {
     return vm.valueStackTop[-1 - distance];
+}
+
+static void concatenate()
+{
+    ObjString* b = AS_STRING(popValue());
+    ObjString* a = AS_STRING(popValue());
+
+    int length = a->length + b->length;
+    char* chars = ALLOCATE(char, length + 1);
+    memcpy(chars, a->chars, a->length);
+    memcpy(chars + a->length, b->chars, b->length);
+    chars[length] = '\0';
+
+    ObjString* result = takeString(chars, length);
+    pushValue(OBJ_VAL(result));
 }
 
 static InterpretResult run()
@@ -83,11 +102,25 @@ static InterpretResult run()
     printf("\n");
     disassembleInstruction(vm.chunk, (int)(vm.ip - vm.chunk->code));
 #endif
-        uint8_t instruction;
-        switch (instruction = READ_BYTE())
+        //uint8_t instruction;
+        switch (READ_BYTE())
         {
             case OP_ADD:
-                BINARY_OP(NUMBER_VAL, +);
+                if (IS_STRING(peek(0)) && IS_STRING(peek(1))) 
+                {
+                    concatenate();
+                }
+                else if (IS_NUMBER(peek(0)) && IS_NUMBER(peek(1)))
+                {
+                    double b = AS_NUMBER(popValue());
+                    double a = AS_NUMBER(popValue());
+                    pushValue(NUMBER_VAL(a + b));
+                }
+                else
+                {
+                    runtimeError("Operands must be two numbers or two strings.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
                 break;
             case OP_CONSTANT:
                 pushValue(READ_CONSTANT());

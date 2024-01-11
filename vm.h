@@ -2,6 +2,7 @@
 #define clox_vm_h
 
 #include "chunk.h"
+#include "object.h"
 #include "value.h"
 
 #define VALUE_STACK_MAX 256
@@ -11,6 +12,7 @@ typedef struct {
 	uint8_t* ip;			// instruction pointer to the NEXT instruction
 	Value valueStack[VALUE_STACK_MAX];
 	Value* valueStackTop;	// First empty slot of value stack
+	struct Obj* objects;	// linked list of objects allocated on heap
 } VM;
 
 typedef enum {
@@ -18,6 +20,8 @@ typedef enum {
 	INTERPRET_COMPILE_ERROR,
 	INTERPRET_RUNTIME_ERROR
 } InterpretResult;
+
+extern VM vm;
 
 void initVM();
 void freeVM();

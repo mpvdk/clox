@@ -3,7 +3,8 @@
 
 #include "common.h"
 
-//typedef struct Obj Obj;
+typedef struct Obj Obj;
+typedef struct ObjString ObjString;
 
 typedef enum 
 {
@@ -19,7 +20,7 @@ typedef struct
 	union {
 		bool boolean;
 		double number;
-		//Obj* obj;
+		Obj* obj;		// strings, instances, functions, etc
 	} as;
 } Value;
 
@@ -30,7 +31,8 @@ typedef struct
 
 #define AS_BOOL(value)		((value).as.boolean)
 #define AS_NUMBER(value)	((value).as.number)
-#define AS_OBJ(value)		((Obj*)(uintptr_t)((value) & ~(SIGN_BIT | QNAN)))
+//#define AS_OBJ(value)		((Obj*)(uintptr_t)((value) & ~(SIGN_BIT | QNAN)))
+#define AS_OBJ(value)		((value).as.obj)
 
 #define BOOL_VAL(value)		((Value){VAL_BOOL, {.boolean=value}})
 #define NIL_VAL				((Value){VAL_NIL, {.number = 0}})
