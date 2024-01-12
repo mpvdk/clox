@@ -36,7 +36,7 @@ typedef enum
     PREC_PRIMARY
 } Precedence;
 
-typedef void (*ParseFn)();
+typedef void (*ParseFn)(bool canAssign);
 
 typedef struct 
 {
@@ -170,7 +170,7 @@ static void endCompiler()
     emitReturn();
 }
 
-static void binary()
+static void binary(bool canAssign)
 {
     TokenType operatorType = parser.previous.type;
     ParseRule* rule = getRule(operatorType);
@@ -208,7 +208,7 @@ static void defineVariable(uint8_t global)
     emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
-static void literal()
+static void literal(bool canAssign)
 {
     switch (parser.previous.type)
     {
@@ -219,19 +219,19 @@ static void literal()
     }
 }
 
-static void grouping()
+static void grouping(bool canAssign)
 {
     expression();
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
 }
 
-static void number()
+static void number(bool canAssign)
 {
     double value = strtod(parser.previous.lexeme_start, NULL);
     emitConstant(NUMBER_VAL(value));
 }
 
-static void string()
+static void string(bool canAssign)
 {
     emitConstant(
             OBJ_VAL(
@@ -243,18 +243,26 @@ static void string()
         );
 }
 
-static void namedVariable(Token name)
+static void namedVariable(Token name, bool canAssign)
 {
     uint8_t arg = identifierConstant(&name);
-    emitBytes(OP_GET_GLOBAL, arg);
+    if (canAssign && match(TOKEN_EQUAL))
+    {
+        expression();
+        emitBytes(OP_SET_GLOBAL, arg);
+    }
+    else
+    {
+        emitBytes(OP_GET_GLOBAL, arg);
+    }
 }
 
-static void variable()
+static void variable(bool canAssign)
 {
-    namedVariable(parser.previous);
+    namedVariable(parser.previous, canAssign);
 }
 
-static void unary()
+static void unary(bool canAssign)
 {
     TokenType operatorType = parser.previous.type;
     parsePrecedence(PREC_UNARY); // compile operand
@@ -319,13 +327,14 @@ static void parsePrecedence(Precedence precedence)
         return;
     }
 
-    prefixRule();
+    bool canAssign = precedence <= PREC_ASSIGNMENT;
+    prefixRule(canAssign);
 
     while (precedence <= getRule(parser.current.type)->precedence)
     {
         advance();
         ParseFn infixRule = getRule(parser.previous.type)->infix;
-        infixRule();
+        infixRule(canAssign);
     }
 }
 
