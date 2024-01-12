@@ -20,7 +20,7 @@ void initTable(Table* table)
 
 void freeTable(Table* table)
 {
-    FREE_ARRAY(Entry, table, table->count);
+    FREE_ARRAY(Entry, table->entries, table->count);
     initTable(table);
 }
 
