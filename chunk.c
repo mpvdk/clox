@@ -1,5 +1,5 @@
-// A 'chunk' is a sequence of bytecode and meta data
 #include <stdlib.h>
+
 #include "chunk.h"
 #include "memory.h"
 #include "value.h"
