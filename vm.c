@@ -157,6 +157,9 @@ static InterpretResult run()
                 pushValue(value);
                 break;
             }
+            case OP_GET_LOCAL:
+                pushValue(vm.valueStack[READ_BYTE()]);
+                break;
             case OP_GREATER:
                 BINARY_OP(BOOL_VAL, >); break;
             case OP_LESS:
@@ -200,6 +203,9 @@ static InterpretResult run()
                 }
                 break;
             }
+            case OP_SET_LOCAL:
+                vm.valueStack[READ_BYTE()] = peek(0);
+                break;
             case OP_SUBTRACT:
                 BINARY_OP(NUMBER_VAL, -);
                 break;
