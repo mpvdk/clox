@@ -34,12 +34,12 @@ Scanner                         scanner.c
     char*       start_current_lexeme
     char*       current_pos
     int         current_src_code_line
-Parser                          parser.c
+Parser                          compiler.c
     Token       current
     Token       previous
     bool        hadError
     bool        panicMode
-ParseRule                       parser.c
+ParseRule                       compiler.c
     ParseFn     prefix
     ParseFn     infix
     Precedence  precedence
