@@ -4,8 +4,10 @@
 #include "common.h"
 #include "value.h"
 
-typedef enum {
+typedef enum
+{
 	OP_ADD,
+	OP_CALL,
 	OP_CONSTANT,
 	OP_DEFINE_GLOBAL,
 	OP_DIVIDE,
@@ -31,7 +33,8 @@ typedef enum {
 	OP_TRUE,
 } OpCode;
 
-typedef struct {
+typedef struct 
+{
 	int count;				// nr of opcodes currently stored in array
 	int capacity;			// capacity of array
 	uint8_t* code;			// an array of OpCodes and operands (operands are indexes into Chunk.constants)

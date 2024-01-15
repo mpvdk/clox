@@ -1,7 +1,8 @@
 #ifndef clox_scanner_h
 #define clox_scanner_h
 
-typedef enum {
+typedef enum
+{
   // Single-character tokens.
   TOKEN_LEFT_PAREN, TOKEN_RIGHT_PAREN, // 0 - 1
   TOKEN_LEFT_BRACE, TOKEN_RIGHT_BRACE, // 2 - 3
@@ -23,7 +24,8 @@ typedef enum {
   TOKEN_ERROR, TOKEN_EOF // 38 - 39
 } TokenType;
 
-typedef struct {
+typedef struct
+{
 	TokenType type;
 	const char* lexeme_start; // points to char in source code
 	int lexeme_length;	  // length of the lexeme in bytes/chars
