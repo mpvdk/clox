@@ -116,6 +116,24 @@ static void errorAtCurrent(const char* message)
     errorAt(&parser.current, message);
 }
 
+// const char* TokenTypeStrings[] = { // for debugging purposes
+//   "TOKEN_LEFT_PAREN","TOKEN_RIGHT_PAREN",
+//   "TOKEN_LEFT_BRACE","TOKEN_RIGHT_BRACE",
+//   "TOKEN_COMMA","TOKEN_DOT", "TOKEN_MINUS", "TOKEN_PLUS",
+//   "TOKEN_SEMICOLON","TOKEN_SLASH", "TOKEN_STAR",
+//   "TOKEN_BANG","TOKEN_BANG_EQUAL",
+//   "TOKEN_EQUAL","TOKEN_EQUAL_EQUAL",
+//   "TOKEN_GREATER","TOKEN_GREATER_EQUAL",
+//   "TOKEN_LESS","TOKEN_LESS_EQUAL",
+//   "TOKEN_IDENTIFIER","TOKEN_STRING", "TOKEN_NUMBER",
+//   "TOKEN_AND","TOKEN_CLASS", "TOKEN_ELSE", "TOKEN_FALSE",
+//   "TOKEN_FOR","TOKEN_FUN", "TOKEN_IF", "TOKEN_NIL", "TOKEN_OR",
+//   "TOKEN_PRINT","TOKEN_RETURN", "TOKEN_SUPER", "TOKEN_THIS",
+//   "TOKEN_TRUE","TOKEN_VAR", "TOKEN_WHILE",
+//   "TOKEN_ERROR","TOKEN_EOF",
+// };
+
+
 static void advance()
 {
     parser.previous = parser.current;
@@ -211,7 +229,7 @@ static void emitConstant(Value value)
 static void patchJump(int offset)
 {
     // -2 to adjust for the bytecode for the jump offset itself
-    int jump = currentChunk()->count - offset -2;
+    int jump = currentChunk()->count - offset - 2;
 
     if (jump > UINT16_MAX) error("if-block contains too much code.");
 
@@ -264,51 +282,6 @@ static void endScope()
         emitByte(OP_POP);
         current->localCount--;
     }
-}
-
-static void binary(bool canAssign)
-{
-    TokenType operatorType = parser.previous.type;
-    ParseRule* rule = getRule(operatorType);
-    parsePrecedence((Precedence)(rule->precedence + 1));
-
-    switch (operatorType)
-    {
-        case TOKEN_BANG_EQUAL:      emitBytes(OP_EQUAL, OP_NOT); break;
-        case TOKEN_EQUAL_EQUAL:     emitByte(OP_EQUAL); break;
-        case TOKEN_GREATER:         emitByte(OP_GREATER); break;
-        case TOKEN_GREATER_EQUAL:   emitBytes(OP_LESS, OP_NOT); break;
-        case TOKEN_LESS:            emitByte(OP_LESS); break;
-        case TOKEN_LESS_EQUAL:      emitBytes(OP_GREATER, OP_NOT); break;
-        case TOKEN_MINUS:           emitByte(OP_SUBTRACT); break;
-        case TOKEN_PLUS:            emitByte(OP_ADD); break;
-        case TOKEN_SLASH:           emitByte(OP_DIVIDE); break;
-        case TOKEN_STAR:            emitByte(OP_MULTIPLY); break;
-        default: return;
-    }
-}
-
-static uint8_t argumentList()
-{
-    uint8_t argCount = 0;
-    if (!check(TOKEN_RIGHT_PAREN))
-    {
-        do
-        {
-            expression();
-            if(argCount == 255) error("Can't have more than 255 arguments.");
-            argCount++;
-        }
-        while (match(TOKEN_COMMA));
-    }
-    consume(TOKEN_RIGHT_PAREN, "Expect ')' after arguments.");
-    return argCount;
-}
-
-static void call(bool canAssign)
-{
-    uint8_t argCount = argumentList();
-    emitBytes(OP_CALL, argCount);
 }
 
 static uint8_t identifierConstant(Token* name)
@@ -401,6 +374,22 @@ static void defineVariable(uint8_t global)
     emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
+static uint8_t argumentList()
+{
+    uint8_t argCount = 0;
+    if (!check(TOKEN_RIGHT_PAREN))
+    {
+        do
+        {
+            expression();
+            if(argCount == 255) error("Can't have more than 255 arguments.");
+            argCount++;
+        }
+        while (match(TOKEN_COMMA));
+    }
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after arguments.");
+    return argCount;
+}
 
 static void and_(bool canAssign)
 {
@@ -410,6 +399,34 @@ static void and_(bool canAssign)
     parsePrecedence(PREC_AND);
 
     patchJump(endJump);
+}
+
+static void binary(bool canAssign)
+{
+    TokenType operatorType = parser.previous.type;
+    ParseRule* rule = getRule(operatorType);
+    parsePrecedence((Precedence)(rule->precedence + 1));
+
+    switch (operatorType)
+    {
+        case TOKEN_BANG_EQUAL:      emitBytes(OP_EQUAL, OP_NOT); break;
+        case TOKEN_EQUAL_EQUAL:     emitByte(OP_EQUAL); break;
+        case TOKEN_GREATER:         emitByte(OP_GREATER); break;
+        case TOKEN_GREATER_EQUAL:   emitBytes(OP_LESS, OP_NOT); break;
+        case TOKEN_LESS:            emitByte(OP_LESS); break;
+        case TOKEN_LESS_EQUAL:      emitBytes(OP_GREATER, OP_NOT); break;
+        case TOKEN_MINUS:           emitByte(OP_SUBTRACT); break;
+        case TOKEN_PLUS:            emitByte(OP_ADD); break;
+        case TOKEN_SLASH:           emitByte(OP_DIVIDE); break;
+        case TOKEN_STAR:            emitByte(OP_MULTIPLY); break;
+        default: return;
+    }
+}
+
+static void call(bool canAssign)
+{
+    uint8_t argCount = argumentList();
+    emitBytes(OP_CALL, argCount);
 }
 
 static void literal(bool canAssign)
@@ -503,7 +520,8 @@ static void unary(bool canAssign)
     }
 }
 
-ParseRule rules[]= {	
+ParseRule rules[] = 
+{	
     [TOKEN_LEFT_PAREN]	    = {grouping,    call,	PREC_CALL},
     [TOKEN_RIGHT_PAREN]	    = {NULL,	    NULL,	PREC_NONE},
     [TOKEN_LEFT_BRACE]	    = {NULL,	    NULL,	PREC_NONE},
@@ -565,6 +583,16 @@ static void parsePrecedence(Precedence precedence)
         ParseFn infixRule = getRule(parser.previous.type)->infix;
         infixRule(canAssign);
     }
+
+    if (canAssign && match(TOKEN_EQUAL))
+    {
+        error("Invalid assignment target.");
+    }
+}
+
+static ParseRule* getRule(TokenType type)
+{
+    return &rules[type];
 }
 
 static void expression()
@@ -798,11 +826,19 @@ static void declaration()
 
 static void statement()
 {
-    if (match(TOKEN_IF))
+    if (match(TOKEN_PRINT)) 
+    {
+        printStatement();
+    }
+    else if (match(TOKEN_FOR))
+    {
+        forStatement();
+    }
+    else if (match(TOKEN_IF))
     {
         ifStatement();
     }
-    else if (match(TOKEN_SEMICOLON))
+    else if (match(TOKEN_RETURN))
     {
         returnStatement();
     }
@@ -816,20 +852,7 @@ static void statement()
         block();
         endScope();
     }
-    else if (match(TOKEN_PRINT)) 
-    {
-        printStatement();
-    }
-    else if (match(TOKEN_FOR))
-    {
-        forStatement();
-    }
     else expressionStatement();
-}
-
-static ParseRule* getRule(TokenType type)
-{
-    return &rules[type];
 }
 
 ObjFunction* compile(const char* source)
