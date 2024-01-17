@@ -24,6 +24,7 @@ static Value clockNative(int argCount, Value* args)
 static void resetValueStack()
 {
     vm.valueStackTop = vm.valueStack;
+    vm.frameCount = 0;
 }
 
 static void runtimeError(const char* format, ...)
@@ -99,6 +100,12 @@ static bool call(ObjFunction* function, int argCount)
 {
     if (argCount != function->arity)
     {
+        runtimeError("Expected %d arguments but got %d.", function->arity, argCount);
+        return false;
+    }
+
+    if (vm.frameCount == FRAMES_MAX)
+    {
         runtimeError("Stack overflow.");
         return false;
     }
@@ -106,7 +113,7 @@ static bool call(ObjFunction* function, int argCount)
     CallFrame* frame = &vm.frames[vm.frameCount++];
     frame->function = function;
     frame->ip = function->chunk.code;
-    frame->slots = vm.valueStackTop - argCount -1;
+    frame->slots = vm.valueStackTop - argCount - 1;
     return true;
 }
 
@@ -185,7 +192,7 @@ static InterpretResult run()
     printf("\n");
     disassembleInstruction(&frame->function->chunk, (int)(frame->ip - frame->function->chunk.code));
 #endif
-        //uint8_t instruction;
+
         switch (READ_BYTE())
         {
             case OP_ADD:
@@ -244,8 +251,11 @@ static InterpretResult run()
                 break;
             }
             case OP_GET_LOCAL:
-                pushValue(vm.valueStack[READ_BYTE()]);
+            {
+                uint8_t slot = READ_BYTE();
+                pushValue(vm.valueStack[slot]);
                 break;
+            }
             case OP_GREATER:
                 BINARY_OP(BOOL_VAL, >); break;
             case OP_JUMP:
@@ -321,8 +331,11 @@ static InterpretResult run()
                 break;
             }
             case OP_SET_LOCAL:
-                frame->slots[READ_BYTE()] = peek(0);
+            {
+                uint8_t slot = READ_BYTE();
+                frame->slots[slot] = peek(0);
                 break;
+            }
             case OP_SUBTRACT:
                 BINARY_OP(NUMBER_VAL, -);
                 break;
