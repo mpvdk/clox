@@ -181,6 +181,7 @@ static InterpretResult run()
 
     while(1)
     {
+
 #ifdef DEBUG_TRACE_EXECUTION
     printf("           ");
     for (Value* slot = vm.valueStack; slot < vm.valueStackTop; slot++)
@@ -253,7 +254,7 @@ static InterpretResult run()
             case OP_GET_LOCAL:
             {
                 uint8_t slot = READ_BYTE();
-                pushValue(vm.valueStack[slot]);
+                pushValue(frame->slots[slot]);
                 break;
             }
             case OP_GREATER:
