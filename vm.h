@@ -11,20 +11,20 @@
 
 typedef struct
 {
-	ObjFunction* function;
+	ObjClosure* closure;
 	uint8_t* ip;
 	Value* slots;
 } CallFrame;
 
 typedef struct
 {
-	CallFrame frames[FRAMES_MAX];
-	int frameCount;
+	CallFrame frames[FRAMES_MAX];		// Stackframes
+	int frameCount;						// Current height of frames
 	Value valueStack[VALUE_STACK_MAX];
-	Value* valueStackTop;	// First empty slot of value stack
-	Table globals;			// global variables
-	Table strings;			// Interned strings
-	struct Obj* objects;	// linked list of objects allocated on heap
+	Value* valueStackTop;				// First empty slot of value stack
+	Table globals;						// global variables
+	Table strings;						// Interned strings
+	struct Obj* objects;				// linked list of objects allocated on heap
 } VM;
 
 typedef enum

@@ -70,12 +70,12 @@ static void skipWhiteSpaceAndComments()
 		break;
 	    // comment
 	    case '/':
-		if (!isAtEnd() && scanner.current_pos[1] == '/') {
+		if (!isAtEnd() && scanner.current_pos[1] == '/')
+		{
 		    // A comment goes until the end of the line.
 		    while (*scanner.current_pos != '\n' && !isAtEnd()) advance();
-		} else {
-		    return;
-		}
+		} 
+		else return;
 		break;
 	    default:
 		return;
