@@ -2,6 +2,7 @@
 #define clox_memory_h
 
 #include "common.h"
+#include "object.h"
 
 #define MIN_CHUNK_CAPACITY 8
 
@@ -20,6 +21,9 @@
 	reallocate(pointer, sizeof(type) * (oldCount), 0)
 
 void* reallocate(void* pointer, size_t oldSize, size_t newSize);
+void collectGarbate();
+void markObject(Obj* object);
+void markValue(Value value);
 void freeObjects();
 
 #endif

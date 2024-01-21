@@ -25,7 +25,11 @@ typedef struct
 	Table globals;						// global variables
 	Table strings;						// Interned strings
 	ObjUpvalue* openUpvalues;			// Closed over variables still on stack
-	struct Obj* objects;				// linked list of objects allocated on heap
+	struct Obj* objects;				// Linked list of objects allocated on heap
+	// "gray" means processed, but not all children processed
+	int grayCount;						// Count of gray objects
+	int grayCapacity;					// Max nr of gray objects
+	Obj** grayStack;					// List of references to gray objects
 } VM;
 
 typedef enum
