@@ -25,6 +25,8 @@ typedef struct
 	Table globals;						// global variables
 	Table strings;						// Interned strings
 	ObjUpvalue* openUpvalues;			// Closed over variables still on stack
+	size_t bytesAllocated;
+	size_t nextGC;
 	struct Obj* objects;				// Linked list of objects allocated on heap
 	// "gray" means processed, but not all children processed
 	int grayCount;						// Count of gray objects
