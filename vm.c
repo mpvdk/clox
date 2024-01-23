@@ -133,6 +133,12 @@ static bool callValue(Value callee, int argCount)
         {
             case OBJ_CLOSURE:
                 return call(AS_CLOSURE(callee), argCount);
+            case OBJ_CLASS:
+            {
+                ObjClass* klass = AS_CLASS(callee);
+                vm.valueStackTop[-argCount - 1] = OBJ_VAL(newInstance(klass));
+                return true;
+            }
             case OBJ_NATIVE:
             {
                 NativeFn native = AS_NATIVE(callee);
@@ -278,6 +284,9 @@ static InterpretResult run()
                 frame = &vm.frames[vm.frameCount - 1];
                 break;
             }
+            case OP_CLASS:
+                pushValue(OBJ_VAL(newClass(READ_STRING())));
+                break;
             case OP_CLOSE_UPVALUE:
                 closeUpvalues(vm.valueStackTop - 1);
                 popValue();
@@ -335,6 +344,26 @@ static InterpretResult run()
                 uint8_t slot = READ_BYTE();
                 pushValue(frame->slots[slot]);
                 break;
+            }
+            case OP_GET_PROPERTY:
+            {
+                if (!IS_INSTANCE(peek(0))) {
+                    runtimeError("Only instances have properties.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+
+                ObjInstance* instance = AS_INSTANCE(peek(0));
+                ObjString* name = READ_STRING();
+
+                Value value;
+                if (tableGet(&instance->fields, name, &value)) 
+                {
+                    popValue();
+                    pushValue(value);
+                    break;
+                }
+                runtimeError("Undefined property '%s'.", name->chars);
+                return INTERPRET_RUNTIME_ERROR;
             }
             case OP_GET_UPVALUE:
             {
@@ -423,6 +452,21 @@ static InterpretResult run()
             {
                 uint8_t slot = READ_BYTE();
                 frame->slots[slot] = peek(0);
+                break;
+            }
+            case OP_SET_PROPERTY:
+            {
+                if (!IS_INSTANCE(peek(1)))
+                {
+                    runtimeError("Only instances have fields.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+
+                ObjInstance* instance = AS_INSTANCE(peek(1));
+                tableSet(&instance->fields, READ_STRING(), peek(0));
+                Value value = popValue();
+                popValue();
+                pushValue(value);
                 break;
             }
             case OP_SET_UPVALUE:

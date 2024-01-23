@@ -70,6 +70,8 @@ int disassembleInstruction(Chunk* chunk, int offset)
             return simpleInstruction("OP_ADD", offset);
         case OP_CALL:
             return byteInstruction("OP_CALL", chunk, offset);
+        case OP_CLASS:
+            return constantInstruction("OP_CLASS", chunk, offset);
         case OP_CLOSE_UPVALUE:
             return simpleInstruction("OP_CLOSE_UPVALUE", offset);
         case OP_CLOSURE:
@@ -104,6 +106,10 @@ int disassembleInstruction(Chunk* chunk, int offset)
             return constantInstruction("OP_GET_GLOBAL", chunk, offset);
         case OP_GET_LOCAL:
             return byteInstruction("OP_GET_LOCAL", chunk, offset);
+        case OP_GET_PROPERTY:
+          return constantInstruction("OP_GET_PROPERTY", chunk, offset);
+        case OP_SET_PROPERTY:
+          return constantInstruction("OP_SET_PROPERTY", chunk, offset);
         case OP_GET_UPVALUE:
             return byteInstruction("OP_GET_UPVALUE", chunk, offset);
         case OP_GREATER:
