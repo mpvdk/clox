@@ -24,6 +24,7 @@ typedef struct
 	Value* valueStackTop;				// First empty slot of value stack
 	Table globals;						// global variables
 	Table strings;						// Interned strings
+	ObjString* initString;				
 	ObjUpvalue* openUpvalues;			// Closed over variables still on stack
 	size_t bytesAllocated;
 	size_t nextGC;
