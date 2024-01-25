@@ -97,7 +97,7 @@ int disassembleInstruction(Chunk* chunk, int offset)
             {
                 int isLocal = chunk->code[offset++];
                 int index = chunk->code[offset++];
-                printf("%04d      |                     %s %d\n",
+                printf("%04d    |                     %s %d\n",
                     offset - 2, isLocal ? "local" : "upvalue", index);
             }
             return offset;
@@ -118,10 +118,14 @@ int disassembleInstruction(Chunk* chunk, int offset)
             return byteInstruction("OP_GET_LOCAL", chunk, offset);
         case OP_GET_PROPERTY:
           return constantInstruction("OP_GET_PROPERTY", chunk, offset);
+        case OP_GET_SUPER:
+            return constantInstruction("OP_GET_SUPER", chunk, offset);
         case OP_GET_UPVALUE:
             return byteInstruction("OP_GET_UPVALUE", chunk, offset);
         case OP_GREATER:
             return simpleInstruction("OP_GREATER", offset);
+        case OP_INHERIT:
+            return simpleInstruction("OP_INHERIT", offset);
         case OP_INVOKE:
             return invokeInstruction("OP_INVOKE", chunk, offset);
         case OP_JUMP:
@@ -158,6 +162,8 @@ int disassembleInstruction(Chunk* chunk, int offset)
             return byteInstruction("OP_SET_UPVALUE", chunk, offset);
         case OP_SUBTRACT:
             return simpleInstruction("OP_SUBTRACT", offset);
+        case OP_SUPER_INVOKE:
+            return invokeInstruction("OP_SUPER_INVOKE", chunk, offset);
         case OP_TRUE:
             return simpleInstruction("OP_TRUE", offset);
         default:

@@ -444,8 +444,17 @@ static InterpretResult run()
                     return INTERPRET_RUNTIME_ERROR;
                 }
                 break;
-
-           }
+            }
+            case OP_GET_SUPER:
+            {
+                ObjString* name = READ_STRING();
+                ObjClass* superclass = AS_CLASS(popValue());
+                if (!bindMethod(superclass, name))
+                {
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                break;
+            }
             case OP_GET_UPVALUE:
             {
                 uint8_t slot = READ_BYTE();
@@ -455,6 +464,19 @@ static InterpretResult run()
             case OP_GREATER:
                 BINARY_OP(BOOL_VAL, >); 
                 break;
+            case OP_INHERIT:
+            {
+                Value superclass = peek(1);
+                if (!IS_CLASS(superclass))
+                {
+                    runtimeError("Superclass must be a class.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                ObjClass* subclass = AS_CLASS(peek(0));
+                tableAddAll(&AS_CLASS(superclass)->methods, &subclass->methods);
+                popValue(); // pop the subclass
+                break;
+            }
             case OP_INVOKE: {
                 ObjString* method = READ_STRING();
                 int argCount = READ_BYTE();
@@ -572,6 +594,18 @@ static InterpretResult run()
             case OP_SUBTRACT:
                 BINARY_OP(NUMBER_VAL, -);
                 break;
+            case OP_SUPER_INVOKE:
+            {
+                ObjString* method = READ_STRING();
+                int argCount = READ_BYTE();
+                ObjClass* superclass = AS_CLASS(popValue());
+                if (!invokeFromClass(superclass, method, argCount))
+                {
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                frame = &vm.frames[vm.frameCount - 1];
+                break;
+            }
             case OP_TRUE:
                 pushValue(BOOL_VAL(true));
                 break;
