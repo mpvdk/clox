@@ -116,7 +116,7 @@ static bool call(ObjClosure* closure, int argCount)
         return false;
     }
 
-    if (vm.frameCount == FRAMES_MAX)
+    if (vm.frameCount >= FRAMES_MAX)
     {
         runtimeError("Stack overflow.");
         return false;
@@ -138,7 +138,7 @@ static bool callValue(Value callee, int argCount)
             case OBJ_BOUND_METHOD:
             {
                 ObjBoundMethod* bound = AS_BOUND_METHOD(callee);
-                vm.valueStack[-argCount - 1] = bound->receiver;
+                vm.valueStackTop[-argCount - 1] = bound->receiver;
                 return call(bound->method, argCount);
             }
             case OBJ_CLASS:

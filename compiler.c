@@ -298,6 +298,13 @@ static ObjFunction* endCompiler()
 {
     emitReturn();
     ObjFunction* function = current->function;
+
+#ifdef DEBUG_PRINT_CODE
+    disassembleChunk(currentChunk(), function->name !=  NULL
+            ? function->name->chars
+            : "<script>");
+#endif
+
     current = current->enclosing;
     return function;
 }
@@ -386,13 +393,13 @@ static int resolveUpvalue(Compiler* compiler, Token* name)
     int local = resolveLocal(compiler->enclosing, name);
     if (local != -1)
     {
+        compiler->enclosing->locals[local].isCaptured = true;
         return addUpvalue(compiler, (uint8_t)local, true);
     }
 
     int upvalue = resolveUpvalue(compiler->enclosing, name);
     if (upvalue != -1)
     {
-        compiler->enclosing->locals[local].isCaptured = true;
         return addUpvalue(compiler, (uint8_t)upvalue, false);
     }
 
