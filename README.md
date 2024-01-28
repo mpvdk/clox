@@ -1,54 +1,43 @@
-# clox
+# clox - a bytecode interpreter for lox
 
-main.c      main()
-main.c      runFile()
-vm.c        interpret()
-    [ chunk.c    initChunk() ]
-compiler.c  compile()
-    [ scanner.c  initScanner() ]
-vm.c        run()
+This is a bytecode interpreter for the lox language built in c. It was created by guidance of the book _Crafting Interpreters_ by Robert Nystrom.
 
+To learn more about the book, check out [craftinginterpreters.com](https://www.craftinginterpreters.com)
 
-Chunk                           vm.c
-    int         count
-    int         capacity
-    uint8_t*    code
-    int         lines
-    ValueArray  constants
-Token                           scanner.c (makeToken()) 
-    TokenType   type
-    char*       lexeme_start
-    int         lexeme_lenght
-    int         src_code_line
-Value                           
-    ValueType   type
-    union {
-        bool    boolean
-        double  number
-    } as
-ValueArray                      chunk.c -> initChunk() -> initValueArray()
-    int         capacity
-    int         count
-    Value*      values
-Scanner                         scanner.c
-    char*       start_current_lexeme
-    char*       current_pos
-    int         current_src_code_line
-Parser                          compiler.c
-    Token       current
-    Token       previous
-    bool        hadError
-    bool        panicMode
-ParseRule                       compiler.c
-    ParseFn     prefix
-    ParseFn     infix
-    Precedence  precedence
-VM                              vm.c
-    Chunk*      chunk
-    uint8_t     ip
-    Value       valueStack[]
-    Value*      valueStackTop
-    Table       strings;
-    struct Obj* objects
+To learn more about the lox language, check out [this particular chapter](https://craftinginterpreters.com/the-lox-language.html)
 
+## Building
 
+First clone this repository and `cd` into it:
+
+```shell
+git clone git@github.com:mpvdk/clox.git && cd plox
+```
+
+Then just run make for the release build:
+
+```shell
+make
+```
+
+To add debug symbols and disable optimization:
+
+```shell
+make debug
+```
+
+For debugging you can also uncomment the debug defines in `common.h`
+
+## Running
+
+To run the interpreter on a lox source file:
+
+``` shell
+./bld/clox <file>
+```
+
+To run the interpreter in interactive mode:
+
+``` shell
+./bld/clox
+```
