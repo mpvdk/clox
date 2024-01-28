@@ -40,7 +40,7 @@ static void freeObject(Obj* object)
         case OBJ_FUNCTION:
         {
             ObjFunction* function = (ObjFunction*)object;
-            freeChunk(&((ObjFunction*)object)->chunk);
+            freeChunk(&function->chunk);
             FREE(ObjFunction, object);
             break;
         }

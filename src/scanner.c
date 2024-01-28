@@ -104,14 +104,9 @@ static bool isDigit(char c)
 
 static bool isAlpha(char c)
 {
-    return (c >= 'a' && c <= 'z' 
-	|| c >= 'A' && c <= 'Z' 
-	|| c == '_');
-}
-
-static char peek()
-{
-    return *scanner.current_pos;
+    return ((c >= 'a' && c <= 'z')
+	|| (c >= 'A' && c <= 'Z') 
+	|| (c == '_'));
 }
 
 static char peekNext()
